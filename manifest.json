@@ -1,0 +1,10 @@
+{
+  "name": "Delfi Paywalled Articles Remover",
+  "version": "1.0",
+  "description": "Removes Paywalled articles from the Delfi.ee news portal",
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "manifest_version": 2
+}
