@@ -1,17 +1,29 @@
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.sync.set({ color: "#3aa757" }, () => {
-    console.log("The color is green.");
-  });
-  chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
-    chrome.declarativeContent.onPageChanged.addRules([
-      {
-        conditions: [
-          new chrome.declarativeContent.PageStateMatcher({
-            pageUrl: { hostEquals: "developer.chrome.com" }
-          })
-        ],
-        actions: [new chrome.declarativeContent.ShowPageAction()]
-      }
-    ]);
-  });
+window.bears = {};
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  window.bears[request.url] = request.count;
+
+  Promise.all(
+    request.links.map(async url => {
+      return {
+        url: url,
+        paywall: await fetch(url)
+          .then(response => response.text())
+          .then(text => text.includes("paywall"))
+          .catch(error => console.log(error))
+      };
+    })
+  ).then(results => console.log(results));
+});
+
+chrome.browserAction.onClicked.addListener(async tab => {
+  chrome.tabs.create({ url: "popup.html" });
+
+  /* let plinks = await Promise.all(
+    tags.map(url => {
+      return potusParse("https://en.wikipedia.org" + url);
+    })
+  ); */
+
+  return true;
+  // Will respond asynchronously.
 });

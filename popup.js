@@ -1,15 +1,26 @@
-let changeColor = document.getElementById("changeColor");
-
-chrome.storage.sync.get("color", data => {
-  changeColor.style.backgroundColor = data.color;
-  changeColor.setAttribute("value", data.color);
-});
-
-changeColor.onclick = element => {
-  let color = element.target.value;
-  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-    chrome.tabs.executeScript(tabs[0].id, {
-      code: `document.body.style.backgroundColor = "${color}";`
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    const bg = chrome.extension.getBackgroundPage();
+    Object.keys(bg.bears).forEach(url => {
+      const div = document.createElement("div");
+      div.textContent = `${url}: ${bg.bears[url]}`;
+      document.body.appendChild(div);
     });
-  });
-};
+
+    // document.querySelector('button').addEventListener('click', onclick, false)
+    //
+    // function onclick () {
+    //   chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
+    //     chrome.tabs.sendMessage(tabs[0].id, 'hi', setCount)
+    //   })
+    // }
+    //
+    // function setCount (res) {
+    //   const div = document.createElement('div')
+    //   div.textContent = `${res.count} bears`
+    //   document.body.appendChild(div)
+    // }
+  },
+  false
+);
