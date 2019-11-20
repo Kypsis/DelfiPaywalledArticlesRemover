@@ -1,8 +1,8 @@
-window.paywalledLinks = new Set();
+window.paywalledLinks = {};
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const uniqueLinks = new Set(request.links);
-  console.log(uniqueLinks);
+  console.log("Unique links: ", uniqueLinks);
 
   Promise.all(
     [...uniqueLinks].map(async url => {

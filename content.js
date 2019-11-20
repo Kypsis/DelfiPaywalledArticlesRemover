@@ -1,22 +1,26 @@
 let previousLinksLength = 0;
-let newLinks = [];
+let seenBeforeLinks = [];
 
 function getAndSendAllLinks() {
-  let links = [...document.links]
+  const linksFromAnchors = [...document.links]
     .map(link => link.href)
     .filter(link =>
+      // Get all links containing delfi.ee or postimees.ee with regex but
+      // exclude them if they contain adform, twitter or facebook
       link.match(
         /^(?=.*(delfi\.ee|postimees\.ee))(?!.*(adform|twitter|facebook)).+$/g
       )
     );
+  const uniqueLinks = [...new Set(linksFromAnchors)];
 
-  if (links.length === previousLinksLength) return;
+  if (uniqueLinks.length === previousLinksLength) return;
 
-  console.log("Links: ", links.length);
-  previousLinksLength = links.length;
+  console.log("Links: ", uniqueLinks.length);
+
+  previousLinksLength = uniqueLinks.length;
 
   chrome.runtime.sendMessage({
-    links: links
+    links: uniqueLinks
   });
 }
 
@@ -36,11 +40,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-/* document.querySelector(`a[href="${link}"]`).closest("article")
-        ? (document
-            .querySelector(`a[href="${link}"]`)
-            .closest("article").style.opacity = 0.1) */
-
-//getAndSendAllLinks();
-//setInterval(getAndSendAllLinks, 10000);
-setTimeout(() => getAndSendAllLinks(), 5000);
+getAndSendAllLinks();
+setInterval(getAndSendAllLinks, 10000);
+//setTimeout(() => getAndSendAllLinks(), 5000);
