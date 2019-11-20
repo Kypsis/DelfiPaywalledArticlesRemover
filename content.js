@@ -25,14 +25,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log("Paywalled links: ", request.paywallList.length);
 
     request.paywallList.forEach(link =>
-      document.querySelector(`a[href="${link}"]`).closest("article")
-        ? (document
-            .querySelector(`a[href="${link}"]`)
-            .closest("article").style.opacity = 0.1)
-        : (document.querySelector(`a[href="${link}"]`).style.opacity = 0.1)
+      document
+        .querySelectorAll(`a[href="${link}"]`)
+        .forEach(item =>
+          item.closest("article")
+            ? (item.closest("article").style.opacity = 0.1)
+            : (item.style.opacity = 0.1)
+        )
     );
   }
 });
+
+/* document.querySelector(`a[href="${link}"]`).closest("article")
+        ? (document
+            .querySelector(`a[href="${link}"]`)
+            .closest("article").style.opacity = 0.1) */
 
 //getAndSendAllLinks();
 //setInterval(getAndSendAllLinks, 10000);

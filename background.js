@@ -1,4 +1,4 @@
-window.paywalledLinks = [];
+window.paywalledLinks = new Set();
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const uniqueLinks = new Set(request.links);
