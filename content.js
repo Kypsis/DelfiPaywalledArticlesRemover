@@ -1,10 +1,16 @@
+let previousLinksLength = 0;
+
 function getAndSendAllLinks() {
   let links = [...document.links]
     .map(link => link.href)
     .filter(link =>
       link.match(/^(?!mailto).*postimees\.ee|^(?!mailto).*delfi\.ee/g)
     );
+
+  if (links.length === previousLinksLength) return;
+
   console.log("Links: ", links.length);
+  previousLinksLength = links.length;
 
   chrome.runtime.sendMessage({
     links: links

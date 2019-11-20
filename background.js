@@ -1,4 +1,5 @@
 window.paywalledLinks = [];
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   Promise.all(
     request.links.map(async url => {
@@ -6,7 +7,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         url: url,
         paywall: await fetch(url)
           .then(response => response.text())
-          .then(text => text.includes("paywall"))
+          .then(text =>
+            /paywall-component="paywall"|class="paywall-container"/g.test(text)
+          )
           .catch(error => console.log(error))
       };
     })
