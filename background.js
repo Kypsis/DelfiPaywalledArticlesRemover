@@ -11,21 +11,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       };
     })
   )
-    .then(results =>
-      results.filter(item => item.paywall === true).map(item => item.url)
-    )
-    .then(paywallList => (window.paywalledLinks = paywallList));
+    .then(results => {
+      const filtered = results
+        .filter(item => item.paywall === true)
+        .map(item => item.url);
+      return [...new Set(filtered)];
+    })
+    .then(paywallList => {
+      window.paywalledLinks = paywallList;
+      chrome.runtime.sendMessage({
+        paywallList: paywallList
+      });
+      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        chrome.tabs.sendMessage(tabs[0].id, { paywallList: paywallList });
+      });
+    });
 });
 
-chrome.browserAction.onClicked.addListener(async tab => {
+chrome.browserAction.onClicked.addListener(tab => {
   chrome.tabs.create({ url: "popup.html" });
-
-  /* let plinks = await Promise.all(
-    tags.map(url => {
-      return potusParse("https://en.wikipedia.org" + url);
-    })
-  ); */
-
-  return true;
-  // Will respond asynchronously.
 });

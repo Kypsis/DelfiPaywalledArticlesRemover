@@ -1,10 +1,29 @@
-let tags = [...document.links]
-  .map(link => link.href)
-  .filter(link =>
-    link.match(/^(?!mailto).*postimees\.ee|^(?!mailto).*delfi\.ee/g)
-  );
-console.log(tags);
+function getAndSendAllLinks() {
+  let links = [...document.links]
+    .map(link => link.href)
+    .filter(link =>
+      link.match(/^(?!mailto).*postimees\.ee|^(?!mailto).*delfi\.ee/g)
+    );
+  console.log("Links: ", links.length);
 
-chrome.runtime.sendMessage({
-  links: tags
+  chrome.runtime.sendMessage({
+    links: links
+  });
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.paywallList.length) {
+    console.log("Paywalled links: ", request.paywallList.length);
+
+    request.paywallList.forEach(link =>
+      document.querySelector(`a[href="${link}"]`).closest("article")
+        ? (document
+            .querySelector(`a[href="${link}"]`)
+            .closest("article").style.opacity = 0.1)
+        : (document.querySelector(`a[href="${link}"]`).style.opacity = 0.1)
+    );
+  }
 });
+
+getAndSendAllLinks();
+//setInterval(getAndSendAllLinks, 10000);
