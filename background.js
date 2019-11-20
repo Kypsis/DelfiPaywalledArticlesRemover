@@ -1,8 +1,11 @@
 window.paywalledLinks = [];
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  const uniqueLinks = new Set(request.links);
+  console.log(uniqueLinks);
+
   Promise.all(
-    request.links.map(async url => {
+    [...uniqueLinks].map(async url => {
       return {
         url: url,
         paywall: await fetch(url)
@@ -16,19 +19,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       };
     })
   )
-    .then(results => {
-      const filtered = results
-        .filter(item => item.paywall === true)
-        .map(item => item.url);
-      return [...new Set(filtered)];
-    })
+    .then(results =>
+      results.filter(item => item.paywall === true).map(item => item.url)
+    )
     .then(paywallList => {
       window.paywalledLinks = paywallList;
       chrome.runtime.sendMessage({
         paywallList: paywallList
       });
       chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-        chrome.tabs.sendMessage(tabs[0].id, { paywallList: paywallList });
+        chrome.tabs.sendMessage(tabs[0].id, {
+          paywallList: window.paywalledLinks
+        });
       });
     });
 });

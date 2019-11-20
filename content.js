@@ -1,11 +1,12 @@
 let previousLinksLength = 0;
+let newLinks = [];
 
 function getAndSendAllLinks() {
   let links = [...document.links]
     .map(link => link.href)
     .filter(link =>
       link.match(
-        /^(?!mailto).*postimees\.ee|^(?!mailto).*delfi\.ee|^(?!admp-tc).*delfi\.ee/g
+        /^(?=.*(delfi\.ee|postimees\.ee))(?!.*(adform|twitter|facebook)).+$/g
       )
     );
 
@@ -35,4 +36,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 //getAndSendAllLinks();
 //setInterval(getAndSendAllLinks, 10000);
-setTimeout(() => getAndSendAllLinks(), 10000);
+setTimeout(() => getAndSendAllLinks(), 5000);
