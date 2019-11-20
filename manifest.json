@@ -1,5 +1,5 @@
 {
-  "name": "bear",
+  "name": "Delfi/Postimees Paywall Detector",
   "version": "1.0",
   "manifest_version": 2,
   "content_scripts": [
@@ -9,7 +9,7 @@
     }
   ],
   "browser_action": {
-    "default_title": "Bear"
+    "default_title": "Delfi/Postimees Paywall Detector"
   },
   "background": {
     "scripts": ["background.js"]

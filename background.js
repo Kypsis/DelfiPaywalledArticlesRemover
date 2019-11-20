@@ -1,7 +1,5 @@
-window.bears = {};
+window.paywalledLinks = [];
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  window.bears[request.url] = request.count;
-
   Promise.all(
     request.links.map(async url => {
       return {
@@ -12,7 +10,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           .catch(error => console.log(error))
       };
     })
-  ).then(results => console.log(results));
+  )
+    .then(results =>
+      results.filter(item => item.paywall === true).map(item => item.url)
+    )
+    .then(paywallList => (window.paywalledLinks = paywallList));
 });
 
 chrome.browserAction.onClicked.addListener(async tab => {
