@@ -8,7 +8,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         paywall: await fetch(url)
           .then(response => response.text())
           .then(text =>
-            /paywall-component="paywall"|class="paywall-container"/g.test(text)
+            /pyfe|paywall-component="paywall"|class="paywall-container"/g.test(
+              text
+            )
           )
           .catch(error => console.log(error))
       };
