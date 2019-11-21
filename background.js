@@ -1,4 +1,5 @@
 // Restrict page action (icon grayed out) to only delfi.ee and postimees.ee
+// BUGGED. TODO: check why the click functionality on icon bugs out.
 /* chrome.runtime.onInstalled.addListener(() => {
   chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
     chrome.declarativeContent.onPageChanged.addRules([
