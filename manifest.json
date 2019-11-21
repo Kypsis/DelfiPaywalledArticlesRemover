@@ -8,11 +8,24 @@
       "js": ["content.js"]
     }
   ],
-  "browser_action": {
-    "default_title": "Delfi/Postimees Paywall Detector"
+  "page_action": {
+    "default_title": "Delfi/Postimees Paywall Detector",
+    "default_icon": {
+      "16": "images/pw16.png",
+      "32": "images/pw32.png",
+      "48": "images/pw48.png",
+      "128": "images/pw128.png"
+    }
   },
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["background.js"],
+    "persistent": false
   },
-  "permissions": ["tabs", "storage"]
+  "icons": {
+    "16": "images/pw16.png",
+    "32": "images/pw32.png",
+    "48": "images/pw48.png",
+    "128": "images/pw128.png"
+  },
+  "permissions": ["tabs", "storage", "declarativeContent"]
 }

@@ -1,3 +1,4 @@
+// Get paywalled links from background.js and output them to new html page
 document.addEventListener(
   "DOMContentLoaded",
   () => {

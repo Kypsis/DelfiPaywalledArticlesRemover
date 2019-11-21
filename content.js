@@ -1,12 +1,13 @@
 let previousLinksLength = 0;
-let seenBeforeLinks = JSON.parse(localStorage.getItem("seenBeforeLinks")) || [];
+let seenBeforeLinks =
+  JSON.parse(sessionStorage.getItem("seenBeforeLinks")) || [];
 
 function getAndSendAllLinks() {
   const linksFromAnchors = [...document.links]
     .map(link => link.href)
     .filter(link =>
       // Get all links containing delfi.ee or postimees.ee with regex but
-      // exclude them if they contain adform, twitter or facebook
+      // exclude them if they contain adform, twitter, facebook, etc
       link.match(
         /^(?=.*(delfi\.ee|postimees\.ee))(?!.*(adform\.net|twitter\.com|facebook\.com|linkedin\.com|mailto|chrome-extension)).+$/g
       )
@@ -22,13 +23,13 @@ function getAndSendAllLinks() {
   seenBeforeLinks = seenBeforeLinks.length
     ? [...new Set([...seenBeforeLinks, ...uniqueLinks])]
     : [...uniqueLinks];
-  localStorage.setItem("seenBeforeLinks", JSON.stringify(seenBeforeLinks));
+  sessionStorage.setItem("seenBeforeLinks", JSON.stringify(seenBeforeLinks));
 
   // If number of links is unchanged return
   if (uniqueLinks.length === previousLinksLength) return;
 
   previousLinksLength = uniqueLinks.length;
-  console.log("Links: ", seenBeforeLinks.length);
+  console.log("Previously saved links: ", seenBeforeLinks.length);
   console.log("New links: ", newLinks.length);
 
   chrome.runtime.sendMessage({
@@ -36,6 +37,10 @@ function getAndSendAllLinks() {
   });
 }
 
+// Paywall link stylings
+let styles = ["style", "opacity:0.1;"];
+
+// Receive paywall links from background.js and style them
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.paywallList.length) {
     console.log("Saved paywalled links: ", request.paywallList.length);
@@ -45,12 +50,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         .querySelectorAll(`a[href="${link}"]`)
         .forEach(item =>
           item.closest("article")
-            ? (item.closest("article").style.opacity = 0.1)
-            : (item.style.opacity = 0.1)
+            ? item.closest("article").setAttribute(...styles)
+            : item.setAttribute(...styles)
         )
     );
   }
 });
 
 getAndSendAllLinks();
-setInterval(getAndSendAllLinks, 10000);
+setInterval(getAndSendAllLinks, 5000);
