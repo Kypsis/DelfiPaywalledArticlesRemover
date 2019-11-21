@@ -1,5 +1,5 @@
 // Restrict page action (icon grayed out) to only delfi.ee and postimees.ee
-chrome.runtime.onInstalled.addListener(() => {
+/* chrome.runtime.onInstalled.addListener(() => {
   chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
     chrome.declarativeContent.onPageChanged.addRules([
       {
@@ -12,18 +12,19 @@ chrome.runtime.onInstalled.addListener(() => {
       }
     ]);
   });
-});
+}); */
 
+let seenBeforeLinks = JSON.parse(localStorage.getItem("seenBeforeLinks")) || [];
 window.paywalledLinks =
-  JSON.parse(sessionStorage.getItem("paywalledLinks")) || [];
+  JSON.parse(localStorage.getItem("paywalledLinks")) || [];
 
 // Listen for links from content.js and store new links
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const newLinks = request.links.filter(
-    item => window.paywalledLinks.indexOf(item) == -1
+    item => seenBeforeLinks.indexOf(item) == -1
   );
+
   console.log("New links: ", newLinks.length);
-  console.log("Saved paywall links: ", window.paywalledLinks.length);
 
   // Fetch new links that contain paywall regex
   Promise.all(
@@ -45,15 +46,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       // Convert array of objects to an array where every link is paywall link
       results.filter(item => item.paywall === true).map(item => item.url)
     )
-    // Store new paywall links
     .then(newPaywallLinks => {
+      // Store new paywall links
       window.paywalledLinks = window.paywalledLinks.length
         ? [...window.paywalledLinks, ...newPaywallLinks]
         : [...newPaywallLinks];
-      sessionStorage.setItem(
+      localStorage.setItem(
         "paywalledLinks",
         JSON.stringify(window.paywalledLinks)
       );
+
+      // Store all unique links and only add when new unique link
+      seenBeforeLinks = seenBeforeLinks.length
+        ? [...new Set([...seenBeforeLinks, ...newLinks])]
+        : [...newLinks];
+      localStorage.setItem("seenBeforeLinks", JSON.stringify(seenBeforeLinks));
+
+      console.log("Total saved links: ", seenBeforeLinks.length);
+      console.log("Saved paywall links: ", window.paywalledLinks.length);
 
       // Send paywalled links to content.js
       chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
