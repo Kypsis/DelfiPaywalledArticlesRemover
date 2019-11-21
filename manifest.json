@@ -1,5 +1,5 @@
 {
-  "name": "Delfi/Postimees Paywall Detector",
+  "name": "Delfi/Postimees Paywall Detector VERSION 1",
   "version": "1.0",
   "manifest_version": 2,
   "content_scripts": [
@@ -9,7 +9,7 @@
     }
   ],
   "browser_action": {
-    "default_title": "Delfi/Postimees Paywall Detector",
+    "default_title": "Delfi/Postimees Paywall Detector VERSION 1",
     "default_icon": {
       "16": "images/pw16.png",
       "32": "images/pw32.png",
