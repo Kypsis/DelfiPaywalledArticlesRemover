@@ -1,5 +1,5 @@
 let previousLinksLength = 0;
-let seenBeforeLinks = [];
+let seenBeforeLinks = JSON.parse(localStorage.getItem("seenBeforeLinks")) || [];
 
 function getAndSendAllLinks() {
   const linksFromAnchors = [...document.links]
@@ -8,25 +8,37 @@ function getAndSendAllLinks() {
       // Get all links containing delfi.ee or postimees.ee with regex but
       // exclude them if they contain adform, twitter or facebook
       link.match(
-        /^(?=.*(delfi\.ee|postimees\.ee))(?!.*(adform|twitter|facebook)).+$/g
+        /^(?=.*(delfi\.ee|postimees\.ee))(?!.*(adform\.net|twitter\.com|facebook\.com|linkedin\.com|mailto|chrome-extension)).+$/g
       )
     );
   const uniqueLinks = [...new Set(linksFromAnchors)];
 
+  // Filter out new links
+  const newLinks = uniqueLinks.filter(
+    item => seenBeforeLinks.indexOf(item) == -1
+  );
+
+  // Store all unique links and only add when new unique link
+  seenBeforeLinks = seenBeforeLinks.length
+    ? [...new Set([...seenBeforeLinks, ...uniqueLinks])]
+    : [...uniqueLinks];
+  localStorage.setItem("seenBeforeLinks", JSON.stringify(seenBeforeLinks));
+
+  // If number of links is unchanged return
   if (uniqueLinks.length === previousLinksLength) return;
 
-  console.log("Links: ", uniqueLinks.length);
-
   previousLinksLength = uniqueLinks.length;
+  console.log("Links: ", seenBeforeLinks.length);
+  console.log("New links: ", newLinks.length);
 
   chrome.runtime.sendMessage({
-    links: uniqueLinks
+    links: newLinks
   });
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.paywallList.length) {
-    console.log("Paywalled links: ", request.paywallList.length);
+    console.log("Saved paywalled links: ", request.paywallList.length);
 
     request.paywallList.forEach(link =>
       document
@@ -42,4 +54,3 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 getAndSendAllLinks();
 setInterval(getAndSendAllLinks, 10000);
-//setTimeout(() => getAndSendAllLinks(), 5000);

@@ -1,17 +1,21 @@
-window.paywalledLinks = {};
+window.paywalledLinks =
+  JSON.parse(localStorage.getItem("paywalledLinks")) || [];
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  const uniqueLinks = new Set(request.links);
-  console.log("Unique links: ", uniqueLinks);
+  const newLinks = request.links.filter(
+    item => window.paywalledLinks.indexOf(item) == -1
+  );
+  console.log("New links: ", newLinks.length);
+  console.log("Saved paywall links: ", window.paywalledLinks.length);
 
   Promise.all(
-    [...uniqueLinks].map(async url => {
+    newLinks.map(async url => {
       return {
         url: url,
         paywall: await fetch(url)
           .then(response => response.text())
           .then(text =>
-            /pyfe|paywall-component="paywall"|class="paywall-container"/g.test(
+            /pyfe-overlay|paywall-component="paywall"|class="paywall-container"/g.test(
               text
             )
           )
@@ -22,11 +26,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     .then(results =>
       results.filter(item => item.paywall === true).map(item => item.url)
     )
-    .then(paywallList => {
-      window.paywalledLinks = paywallList;
-      chrome.runtime.sendMessage({
-        paywallList: paywallList
-      });
+    .then(newPaywallLinks => {
+      window.paywalledLinks = window.paywalledLinks.length
+        ? [...window.paywalledLinks, ...newPaywallLinks]
+        : [...newPaywallLinks];
+      localStorage.setItem(
+        "paywalledLinks",
+        JSON.stringify(window.paywalledLinks)
+      );
+
       chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
         chrome.tabs.sendMessage(tabs[0].id, {
           paywallList: window.paywalledLinks
